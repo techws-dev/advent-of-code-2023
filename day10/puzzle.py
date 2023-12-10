@@ -89,8 +89,56 @@ while end == False:
 print('farthest point:')
 print(len(path[1::]))
 
+
+
 # Puzzle 2 we need to find points that are enclosed in loop
 # For that purpose, we will raycast from west to east, 
 # for each point we count number of walls found
 # if number is odd we are enclosed in the loop.
 
+
+# Replace 'S' by the real pipe symbol
+start_connections = []
+if (start[0],start[1]-1) in path[1]:
+    start_connections += ['N']
+if (start[0],start[1]+1) in path[1]:
+    start_connections += ['S']
+if (start[0]+1,start[1]) in path[1]:
+    start_connections += ['E']
+if (start[0]-1,start[1]) in path[1]:
+    start_connections += ['W']
+
+symbol = [p[0] for p in pipes.items() if p[1] == start_connections]
+area_map[start[1]][start[0]] = symbol[0]
+
+# Raycast all the map
+enclosed = []
+for y, line in enumerate(area_map):
+    multi_col_wall = False
+    multi_col_start = None
+    walls = 0
+    for x, tile in enumerate(line):
+        if walls % 2 == 1 and (x, y) not in discovered:
+            enclosed += [(x, y)]
+            # print(tile, x, y)
+        elif (x, y) in discovered:
+            if tile == '|':
+                walls += 1
+            elif tile != '-':
+                if multi_col_wall == False:
+                    multi_col_wall = True
+                    multi_col_start = tile
+                else:
+                    if multi_col_start == 'L' and tile == '7':
+                        walls += 1
+                    elif multi_col_start == 'L' and tile == 'J':
+                        walls += 2
+                    if multi_col_start == 'F' and tile == '7':
+                        walls += 2
+                    elif multi_col_start == 'F' and tile == 'J':
+                        walls += 1
+                    multi_col_wall = False
+                    multi_col_start = None
+
+print('enclosed tiles:')
+print(len(enclosed))
